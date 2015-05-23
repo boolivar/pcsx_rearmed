@@ -21,6 +21,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 //  Inner loop driver instanciation file
 
+#ifndef GPU_UNAI_INNER_H
+#define GPU_UNAI_INNER_H
+
+#include "gpu_inner_blend.h"
+#include "gpu_inner_light.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 //  Option Masks
 #define   L ((CF>>0)&1)
@@ -34,46 +40,38 @@
 
 #define  MB ((CF>>8)&1)
 
-#include "gpu_inner_blend.h"
-#include "gpu_inner_light.h"
-
 ///////////////////////////////////////////////////////////////////////////////
 //  GPU Pixel opperations generator
 template<const int CF>
-INLINE void gpuPixelFn(u16 *pixel,const u16 data)
+INLINE void gpuPixelFn(u16 * const pixel, u16 data)
 {
-	if ((!M)&&(!B))
-	{
-		if(MB) { *pixel = data | 0x8000; }
-		else   { *pixel = data; }
+    const u16 pixel_data = *pixel;
+
+    if ((M) && (pixel_data & 0x8000)) {
+        return;
+    }
+
+    if (B) {
+        const u32 uMsk = 0x7BDE;
+
+        if (BM==0) { gpuBlending00(data, pixel_data); }
+        else if (BM==1) { gpuBlending01(data, pixel_data); }
+        else if (BM==2) { gpuBlending02(data, pixel_data); }
+        else if (BM==3) { gpuBlending03(data, pixel_data); }
 	}
-	else if ((M)&&(!B))
-	{
-		if (!(*pixel&0x8000))
-		{
-			if(MB) { *pixel = data | 0x8000; }
-			else   { *pixel = data; }
-		}
-	}
-	else
-	{
-		u16 uDst = *pixel;
-		if(M) { if (uDst&0x8000) return; }
-		u16 uSrc = data;
-		u32 uMsk; if (BM==0) uMsk=0x7BDE;
-		if (BM==0) gpuBlending00(uSrc, uDst);
-		if (BM==1) gpuBlending01(uSrc, uDst);
-		if (BM==2) gpuBlending02(uSrc, uDst);
-		if (BM==3) gpuBlending03(uSrc, uDst);
-		if(MB) { *pixel = uSrc | 0x8000; }
-		else   { *pixel = uSrc; }
-	}
+
+    if (MB) {
+        *pixel = data | 0x8000;
+    }
+    else {
+        *pixel = data;
+    }
 }
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Pixel drawing drivers, for lines (only blending)
-typedef void (*PD)(u16 *pixel,const u16 data);
+typedef void (*PD)(u16 * const pixel, u16 data);
 const PD  gpuPixelDrivers[32] =   //  We only generate pixel op for MASKING/BLEND_ENABLE/BLEND_MODE
 { 
 	gpuPixelFn<0x00<<1>,gpuPixelFn<0x01<<1>,gpuPixelFn<0x02<<1>,gpuPixelFn<0x03<<1>,  
@@ -107,8 +105,8 @@ INLINE void  gpuTileSpanFn(u16 *pDst, u32 count, u16 data)
 	{
 		u16 uSrc;
 		u16 uDst;
-		u32 uMsk; if (BM==0) uMsk=0x7BDE;
-		do
+        u32 uMsk; if (BM==0) uMsk=0x7BDE;
+        do
 		{
 			//  MASKING
 			uDst = *pDst;
@@ -153,7 +151,7 @@ INLINE void  gpuSpriteSpanFn(u16 *pDst, u32 count, u32 u0, const u32 mask)
 	const u16 *_CBA; if(TM!=3) _CBA=CBA;
 	u32 lCol; if(L)  { lCol = ((u32)(b4<< 2)&(0x03ff)) | ((u32)(g4<<13)&(0x07ff<<10)) | ((u32)(r4<<24)&(0x07ff<<21));  }
 	u8 rgb; if (TM==1) rgb = ((u8*)pTxt)[u0>>1];
-	u32 uMsk; if ((B)&&(BM==0)) uMsk=0x7BDE;
+    u32 uMsk; if ((B)&&(BM==0)) uMsk=0x7BDE;
 
 	do
 	{
@@ -247,7 +245,7 @@ const PS gpuSpriteSpanDrivers[512] =
 ///////////////////////////////////////////////////////////////////////////////
 //  GPU Polygon innerloops generator
 template<const int CF>
-INLINE void  gpuPolySpanFn(u16 *pDst, u32 count)
+INLINE void gpuPolySpanFn(u16 * pDst, u32 count)
 {
 	if (!TM)
 	{	
@@ -272,8 +270,8 @@ INLINE void  gpuPolySpanFn(u16 *pDst, u32 count)
 			{
 				u16 uSrc;
 				u16 uDst;
-				u32 uMsk; if (BM==0) uMsk=0x7BDE;
-				do
+                u32 uMsk; if (BM==0) uMsk=0x7BDE;
+                do
 				{
 					//  masking
 					uDst = *pDst;
@@ -298,8 +296,8 @@ INLINE void  gpuPolySpanFn(u16 *pDst, u32 count)
 			u16 uSrc;
 			u32 linc=lInc;
 			u32 lCol=((u32)(b4>>14)&(0x03ff)) | ((u32)(g4>>3)&(0x07ff<<10)) | ((u32)(r4<<8)&(0x07ff<<21));
-			u32 uMsk; if ((B)&&(BM==0)) uMsk=0x7BDE;
-			do
+            u32 uMsk; if ((B)&&(BM==0)) uMsk=0x7BDE;
+            do
 			{
 				//  masking
 				if(M) { uDst = *pDst;  if (uDst&0x8000) goto endgou;  }
@@ -392,7 +390,7 @@ static void gpuPolySpanFn_NULL_(u16 *pDst, u32 count)
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Polygon innerloops driver
-typedef void (*PP)(u16 *pDst, u32 count);
+typedef void (*PP)(u16 * pDst, u32 count);
 const PP gpuPolySpanDrivers[512] =
 {
 	gpuPolySpanFn<0x00>,gpuPolySpanFn<0x01>,gpuPolySpanFn<0x02>,gpuPolySpanFn<0x03>,  gpuPolySpanFn<0x04>,gpuPolySpanFn<0x05>,gpuPolySpanFn<0x06>,gpuPolySpanFn<0x07>,  gpuPolySpanFn_NULL_,gpuPolySpanFn_NULL_,gpuPolySpanFn<0x0A>,gpuPolySpanFn<0x0B>,  gpuPolySpanFn_NULL_,gpuPolySpanFn_NULL_,gpuPolySpanFn<0x0E>,gpuPolySpanFn<0x0F>,
@@ -431,3 +429,5 @@ const PP gpuPolySpanDrivers[512] =
 	gpuPolySpanFn_NULL_,gpuPolySpanFn<0x1e1>,gpuPolySpanFn_NULL_,gpuPolySpanFn<0x1e3>,  gpuPolySpanFn_NULL_,gpuPolySpanFn<0x1e5>,gpuPolySpanFn_NULL_,gpuPolySpanFn<0x1e7>,  gpuPolySpanFn_NULL_,gpuPolySpanFn_NULL_,gpuPolySpanFn_NULL_,gpuPolySpanFn<0x1eB>,  gpuPolySpanFn_NULL_,gpuPolySpanFn_NULL_,gpuPolySpanFn_NULL_,gpuPolySpanFn<0x1eF>,
 	gpuPolySpanFn_NULL_,gpuPolySpanFn_NULL_, gpuPolySpanFn_NULL_,gpuPolySpanFn<0x1f3>,  gpuPolySpanFn_NULL_,gpuPolySpanFn_NULL_, gpuPolySpanFn_NULL_,gpuPolySpanFn<0x1f7>,  gpuPolySpanFn_NULL_,gpuPolySpanFn_NULL_,gpuPolySpanFn_NULL_,gpuPolySpanFn<0x1fB>,  gpuPolySpanFn_NULL_,gpuPolySpanFn_NULL_,gpuPolySpanFn_NULL_,gpuPolySpanFn<0x1fF>
 };
+
+#endif // GPU_UNAI_INNER_H
