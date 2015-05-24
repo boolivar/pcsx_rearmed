@@ -66,8 +66,14 @@ s32		x_end,y_end;
 u16*  pvram;
 
 u32 GP0;
+
+#if 1
+u8 packIndex = 0;
+u8 packSize;
+#else
 s32 PacketCount;
 s32 PacketIndex;
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Display status
@@ -305,30 +311,18 @@ u8 PacketSize[256] =
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-INLINE void gpuSendPacket()
-{
-#ifdef DEBUG_ANALYSIS
-	dbg_anacnt_GPU_sendPacket++;
-#endif
-    int cmd = PacketBuffer.U4[0]>>24;
-    handlers[cmd]();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 INLINE void gpuCheckPacket(u32 uData)
 {
-	if (PacketCount)
-	{
-		PacketBuffer.U4[PacketIndex++] = uData;
-		--PacketCount;
-	}
-	else
-	{
-		PacketBuffer.U4[0] = uData;
-		PacketCount = PacketSize[uData >> 24];
-		PacketIndex = 1;
-	}
-	if (!PacketCount) gpuSendPacket();
+    if (packIndex == 0) {
+        packSize = PacketSize[uData >> 24];
+    }
+
+    PacketBuffer.U4[packIndex++] = uData;
+
+    if (packIndex > packSize) {
+        handlers[PacketBuffer.U4[0] >> 24]();
+        packIndex = 0;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -383,7 +377,7 @@ void  GPU_writeDataMem(u32* dmaAddress, s32 dmaCount)
 		{
 			data = *dmaAddress++;
 			dmaCount--;
-			gpuCheckPacket(data);
+            gpuCheckPacket(data);
 		}
 	}
 
@@ -605,18 +599,18 @@ void  GPU_writeStatus(u32 data)
 		break;
 	case 0x01:
 		GPU_GP1 &= ~0x08000000;
-		PacketCount = 0; FrameToRead = FrameToWrite = false;
+        packIndex = 0; FrameToRead = FrameToWrite = false;
 		break;
 	case 0x02:
 		GPU_GP1 &= ~0x08000000;
-		PacketCount = 0; FrameToRead = FrameToWrite = false;
+        packIndex = 0; FrameToRead = FrameToWrite = false;
 		break;
 	case 0x03:
 		GPU_GP1 = (GPU_GP1 & ~0x00800000) | ((data & 1) << 23);
 		break;
 	case 0x04:
 		if (data == 0x04000000)
-		PacketCount = 0;
+        packIndex = 0;
 		GPU_GP1 = (GPU_GP1 & ~0x60000000) | ((data & 3) << 29);
 		break;
 	case 0x05:

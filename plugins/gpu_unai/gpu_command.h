@@ -238,8 +238,10 @@ void gpuSendPacketFunction()
 			{
 				PacketBuffer.U4[1] = PacketBuffer.U4[2];
 				PacketBuffer.U4[2] = PacketBuffer.U4[3];
-				PacketCount = 1;
-				PacketIndex = 3;
+                //PacketCount = 1;
+                //PacketIndex = 3;
+                packIndex = 3;
+                packSize = 3;
 			}
 			break;
 		case 0x50:
@@ -273,8 +275,10 @@ void gpuSendPacketFunction()
 				PacketBuffer.U4[0] = PacketBuffer.U4[2];
 				PacketBuffer.U4[1] = PacketBuffer.U4[3];
 				PacketBuffer.U4[2] = PacketBuffer.U4[4];
-				PacketCount = 2;
-				PacketIndex = 3;
+                //PacketCount = 2;
+                //PacketIndex = 3;
+                packIndex = 3;
+                packSize = 4;
 			}
 			break;
 		case 0x60:
