@@ -52,8 +52,6 @@ INLINE void gpuPixelFn(u16 * const pixel, u16 data)
     }
 
     if (B) {
-        const u32 uMsk = 0x7BDE;
-
         if (BM==0) { gpuBlending00(data, pixel_data); }
         else if (BM==1) { gpuBlending01(data, pixel_data); }
         else if (BM==2) { gpuBlending02(data, pixel_data); }
@@ -105,7 +103,6 @@ INLINE void  gpuTileSpanFn(u16 *pDst, u32 count, u16 data)
 	{
 		u16 uSrc;
 		u16 uDst;
-        u32 uMsk; if (BM==0) uMsk=0x7BDE;
         do
 		{
 			//  MASKING
@@ -151,7 +148,6 @@ INLINE void  gpuSpriteSpanFn(u16 *pDst, u32 count, u32 u0, const u32 mask)
 	const u16 *_CBA; if(TM!=3) _CBA=CBA;
 	u32 lCol; if(L)  { lCol = ((u32)(b4<< 2)&(0x03ff)) | ((u32)(g4<<13)&(0x07ff<<10)) | ((u32)(r4<<24)&(0x07ff<<21));  }
 	u8 rgb; if (TM==1) rgb = ((u8*)pTxt)[u0>>1];
-    u32 uMsk; if ((B)&&(BM==0)) uMsk=0x7BDE;
 
 	do
 	{
@@ -270,7 +266,6 @@ INLINE void gpuPolySpanFn(u16 * pDst, u32 count)
 			{
 				u16 uSrc;
 				u16 uDst;
-                u32 uMsk; if (BM==0) uMsk=0x7BDE;
                 do
 				{
 					//  masking
@@ -296,7 +291,6 @@ INLINE void gpuPolySpanFn(u16 * pDst, u32 count)
 			u16 uSrc;
 			u32 linc=lInc;
 			u32 lCol=((u32)(b4>>14)&(0x03ff)) | ((u32)(g4>>3)&(0x07ff<<10)) | ((u32)(r4<<8)&(0x07ff<<21));
-            u32 uMsk; if ((B)&&(BM==0)) uMsk=0x7BDE;
             do
 			{
 				//  masking
@@ -338,7 +332,6 @@ INLINE void gpuPolySpanFn(u16 * pDst, u32 count)
 		u32 lCol;
 		if(L && !G) { lCol = ((u32)(b4<< 2)&(0x03ff)) | ((u32)(g4<<13)&(0x07ff<<10)) | ((u32)(r4<<24)&(0x07ff<<21)); }
 		else if(L && G) { lCol = ((u32)(b4>>14)&(0x03ff)) | ((u32)(g4>>3)&(0x07ff<<10)) | ((u32)(r4<<8)&(0x07ff<<21)); 	}
-		u32 uMsk; if ((B)&&(BM==0)) uMsk=0x7BDE;
 		do
 		{
 			//  masking
