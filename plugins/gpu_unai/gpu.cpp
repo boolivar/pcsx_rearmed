@@ -96,8 +96,11 @@ u32   lInc;
 u32   tInc, tMsk;
 
 GPUPacket PacketBuffer;
+
 // FRAME_BUFFER_SIZE is defined in bytes; 512K is guard memory for out of range reads
-u16   GPU_FrameBuffer[(FRAME_BUFFER_SIZE+512*1024)/2] __attribute__((aligned(2048)));
+u16 GPU_FrameBuffer[(FRAME_BUFFER_SIZE+512*1024)/2] __attribute__((aligned(2048)));
+const u16 * const VIDEO_END=(GPU_FrameBuffer+(FRAME_BUFFER_SIZE/2)-1);
+
 u32   GPU_GP1;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -206,12 +209,15 @@ static const command_t handlers[256] = {
 INLINE void gpuReset(void)
 {
 	GPU_GP1 = 0x14802000;
-	TextureWindow[0] = 0;
+
+    TextureWindow[0] = 0;
 	TextureWindow[1] = 0;
 	TextureWindow[2] = 255;
 	TextureWindow[3] = 255;
-	DrawingArea[2] = 256;
+
+    DrawingArea[2] = 256;
 	DrawingArea[3] = 240;
+
 	DisplayArea[2] = 256;
 	DisplayArea[3] = 240;
 	DisplayArea[5] = 240;
@@ -334,8 +340,8 @@ void  GPU_writeDataMem(u32* dmaAddress, s32 dmaCount)
 	pcsx4all_prof_pause(PCSX4ALL_PROF_CPU);
 	pcsx4all_prof_start_with_pause(PCSX4ALL_PROF_GPU,PCSX4ALL_PROF_HW_WRITE);
 	u32 data;
-	const u16 *VIDEO_END=(GPU_FrameBuffer+(FRAME_BUFFER_SIZE/2)-1);
-	GPU_GP1 &= ~0x14000000;
+
+    GPU_GP1 &= ~0x14000000;
 
 	while (dmaCount) 
 	{
@@ -436,7 +442,6 @@ long GPU_dmaChain(u32* baseAddr, u32 dmaVAddr)
 ///////////////////////////////////////////////////////////////////////////////
 void  GPU_writeData(u32 data)
 {
-	const u16 *VIDEO_END=(GPU_FrameBuffer+(FRAME_BUFFER_SIZE/2)-1);
 #ifdef DEBUG_ANALYSIS
 	dbg_anacnt_GPU_writeData++;
 #endif
@@ -489,7 +494,6 @@ void  GPU_writeData(u32 data)
 ///////////////////////////////////////////////////////////////////////////////
 void  GPU_readDataMem(u32* dmaAddress, s32 dmaCount)
 {
-	const u16 *VIDEO_END=(GPU_FrameBuffer+(FRAME_BUFFER_SIZE/2)-1);
 #ifdef DEBUG_ANALYSIS
 	dbg_anacnt_GPU_readDataMem++;
 #endif
@@ -537,7 +541,6 @@ void  GPU_readDataMem(u32* dmaAddress, s32 dmaCount)
 ///////////////////////////////////////////////////////////////////////////////
 u32  GPU_readData(void)
 {
-	const u16 *VIDEO_END=(GPU_FrameBuffer+(FRAME_BUFFER_SIZE/2)-1);
 #ifdef DEBUG_ANALYSIS
 	dbg_anacnt_GPU_readData++;
 #endif
