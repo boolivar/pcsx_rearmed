@@ -27,6 +27,8 @@
 #include "gpu_inner_blend.h"
 #include "gpu_inner_light.h"
 
+#include <cstring>
+
 ///////////////////////////////////////////////////////////////////////////////
 //  Option Masks
 #define   L ((CF>>0)&1)
@@ -87,41 +89,28 @@ const PD  gpuPixelDrivers[32] =   //  We only generate pixel op for MASKING/BLEN
 //  GPU Tiles innerloops generator
 
 template<const int CF>
-INLINE void  gpuTileSpanFn(u16 *pDst, u32 count, u16 data)
+INLINE void gpuTileSpanFn(u16 *pDst, u32 count, u16 data)
 {
-	if ((!M)&&(!B))
-	{
-		if (MB) { data = data | 0x8000; }
-		do { *pDst++ = data; } while (--count);
-	}
-	else if ((M)&&(!B))
-	{
-		if (MB) { data = data | 0x8000; }
-		do { if (!(*pDst&0x8000)) { *pDst = data; } pDst++; } while (--count);
-	}
-	else
-	{
-		u16 uSrc;
-		u16 uDst;
-        do
-		{
-			//  MASKING
-			uDst = *pDst;
-			if(M) { if (uDst&0x8000) goto endtile;  }
-			uSrc = data;
+    if (B) {
+        do {
+            gpuPixelFn<CF>(pDst, data);
+        } while (--count);
+    } else {
+        if (MB) {
+            data = data | 0x8000;
+        }
 
-			//  BLEND
-			if (BM==0) gpuBlending00(uSrc, uDst);
-			if (BM==1) gpuBlending01(uSrc, uDst);
-			if (BM==2) gpuBlending02(uSrc, uDst);
-			if (BM==3) gpuBlending03(uSrc, uDst);
-
-			if (MB) { *pDst = uSrc | 0x8000; }
-			else    { *pDst = uSrc; }
-			endtile: pDst++;
-		}
-		while (--count);
-	}
+        if (!(M)) {
+            memset(pDst, data, count);
+        } else {
+            do {
+                if (!(*pDst & 0x8000)) {
+                    *pDst = data;
+                }
+                pDst++;
+            } while (--count);
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
