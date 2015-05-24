@@ -18,6 +18,11 @@
 *   51 Franklin Street, Fifth Floor, Boston, MA 02111-1307 USA.           *
 ***************************************************************************/
 
+#ifndef UNAI_GPU_COMMAND_H
+#define UNAI_GPU_COMMAND_H
+
+typedef void (*command_t)();
+
 ///////////////////////////////////////////////////////////////////////////////
 INLINE void gpuSetTexture(u16 tpage)
 {
@@ -65,9 +70,10 @@ INLINE void gpuSetCLUT(u16 clut)
 #define Blending_Mode (((PRIM&0x2)&&(blend))?BLEND_MODE:0)
 #define Lighting (((~PRIM)&0x1)&&(light))
 
-void gpuSendPacketFunction(const int PRIM)
+template<int PRIM>
+void gpuSendPacketFunction()
 {
-	//printf("0x%x\n",PRIM);
+    //printf("0x%x\n",PRIM);
 
 	switch (PRIM)
 	{
@@ -455,3 +461,5 @@ void gpuSendPacketFunction(const int PRIM)
 			break;
 	}
 }
+
+#endif // UNAI_GPU_COMMAND_H

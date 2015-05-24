@@ -25,6 +25,7 @@
 
 int skipCount = 2; /* frame skip (0,1,2,3...) */
 int skCount = 0; /* internal frame skip */
+
 int linesInterlace = 0;  /* internal lines interlace */
 int linesInterlace_user = 0; /* Lines interlace */
 
@@ -134,6 +135,73 @@ u32   GPU_GP1;
 // GPU command buffer execution/store
 #include "gpu_command.h"
 
+static const command_t handlers[256] = {
+    gpuSendPacketFunction<0>,gpuSendPacketFunction<1>,gpuSendPacketFunction<2>,gpuSendPacketFunction<3>,
+    gpuSendPacketFunction<4>,gpuSendPacketFunction<5>,gpuSendPacketFunction<6>,gpuSendPacketFunction<7>,
+    gpuSendPacketFunction<8>,gpuSendPacketFunction<9>,gpuSendPacketFunction<10>,gpuSendPacketFunction<11>,
+    gpuSendPacketFunction<12>,gpuSendPacketFunction<13>,gpuSendPacketFunction<14>,gpuSendPacketFunction<15>,
+    gpuSendPacketFunction<16>,gpuSendPacketFunction<17>,gpuSendPacketFunction<18>,gpuSendPacketFunction<19>,
+    gpuSendPacketFunction<20>,gpuSendPacketFunction<21>,gpuSendPacketFunction<22>,gpuSendPacketFunction<23>,
+    gpuSendPacketFunction<24>,gpuSendPacketFunction<25>,gpuSendPacketFunction<26>,gpuSendPacketFunction<27>,
+    gpuSendPacketFunction<28>,gpuSendPacketFunction<29>,gpuSendPacketFunction<30>,gpuSendPacketFunction<31>,
+    gpuSendPacketFunction<32>,gpuSendPacketFunction<33>,gpuSendPacketFunction<34>,gpuSendPacketFunction<35>,
+    gpuSendPacketFunction<36>,gpuSendPacketFunction<37>,gpuSendPacketFunction<38>,gpuSendPacketFunction<39>,
+    gpuSendPacketFunction<40>,gpuSendPacketFunction<41>,gpuSendPacketFunction<42>,gpuSendPacketFunction<43>,
+    gpuSendPacketFunction<44>,gpuSendPacketFunction<45>,gpuSendPacketFunction<46>,gpuSendPacketFunction<47>,
+    gpuSendPacketFunction<48>,gpuSendPacketFunction<49>,gpuSendPacketFunction<50>,gpuSendPacketFunction<51>,
+    gpuSendPacketFunction<52>,gpuSendPacketFunction<53>,gpuSendPacketFunction<54>,gpuSendPacketFunction<55>,
+    gpuSendPacketFunction<56>,gpuSendPacketFunction<57>,gpuSendPacketFunction<58>,gpuSendPacketFunction<59>,
+    gpuSendPacketFunction<60>,gpuSendPacketFunction<61>,gpuSendPacketFunction<62>,gpuSendPacketFunction<63>,
+    gpuSendPacketFunction<64>,gpuSendPacketFunction<65>,gpuSendPacketFunction<66>,gpuSendPacketFunction<67>,
+    gpuSendPacketFunction<68>,gpuSendPacketFunction<69>,gpuSendPacketFunction<70>,gpuSendPacketFunction<71>,
+    gpuSendPacketFunction<72>,gpuSendPacketFunction<73>,gpuSendPacketFunction<74>,gpuSendPacketFunction<75>,
+    gpuSendPacketFunction<76>,gpuSendPacketFunction<77>,gpuSendPacketFunction<78>,gpuSendPacketFunction<79>,
+    gpuSendPacketFunction<80>,gpuSendPacketFunction<81>,gpuSendPacketFunction<82>,gpuSendPacketFunction<83>,
+    gpuSendPacketFunction<84>,gpuSendPacketFunction<85>,gpuSendPacketFunction<86>,gpuSendPacketFunction<87>,
+    gpuSendPacketFunction<88>,gpuSendPacketFunction<89>,gpuSendPacketFunction<90>,gpuSendPacketFunction<91>,
+    gpuSendPacketFunction<92>,gpuSendPacketFunction<93>,gpuSendPacketFunction<94>,gpuSendPacketFunction<95>,
+    gpuSendPacketFunction<96>,gpuSendPacketFunction<97>,gpuSendPacketFunction<98>,gpuSendPacketFunction<99>,
+    gpuSendPacketFunction<100>,gpuSendPacketFunction<101>,gpuSendPacketFunction<102>,gpuSendPacketFunction<103>,
+    gpuSendPacketFunction<104>,gpuSendPacketFunction<105>,gpuSendPacketFunction<106>,gpuSendPacketFunction<107>,
+    gpuSendPacketFunction<108>,gpuSendPacketFunction<109>,gpuSendPacketFunction<110>,gpuSendPacketFunction<111>,
+    gpuSendPacketFunction<112>,gpuSendPacketFunction<113>,gpuSendPacketFunction<114>,gpuSendPacketFunction<115>,
+    gpuSendPacketFunction<116>,gpuSendPacketFunction<117>,gpuSendPacketFunction<118>,gpuSendPacketFunction<119>,
+    gpuSendPacketFunction<120>,gpuSendPacketFunction<121>,gpuSendPacketFunction<122>,gpuSendPacketFunction<123>,
+    gpuSendPacketFunction<124>,gpuSendPacketFunction<125>,gpuSendPacketFunction<126>,gpuSendPacketFunction<127>,
+    gpuSendPacketFunction<128>,gpuSendPacketFunction<129>,gpuSendPacketFunction<130>,gpuSendPacketFunction<131>,
+    gpuSendPacketFunction<132>,gpuSendPacketFunction<133>,gpuSendPacketFunction<134>,gpuSendPacketFunction<135>,
+    gpuSendPacketFunction<136>,gpuSendPacketFunction<137>,gpuSendPacketFunction<138>,gpuSendPacketFunction<139>,
+    gpuSendPacketFunction<140>,gpuSendPacketFunction<141>,gpuSendPacketFunction<142>,gpuSendPacketFunction<143>,
+    gpuSendPacketFunction<144>,gpuSendPacketFunction<145>,gpuSendPacketFunction<146>,gpuSendPacketFunction<147>,
+    gpuSendPacketFunction<148>,gpuSendPacketFunction<149>,gpuSendPacketFunction<150>,gpuSendPacketFunction<151>,
+    gpuSendPacketFunction<152>,gpuSendPacketFunction<153>,gpuSendPacketFunction<154>,gpuSendPacketFunction<155>,
+    gpuSendPacketFunction<156>,gpuSendPacketFunction<157>,gpuSendPacketFunction<158>,gpuSendPacketFunction<159>,
+    gpuSendPacketFunction<160>,gpuSendPacketFunction<161>,gpuSendPacketFunction<162>,gpuSendPacketFunction<163>,
+    gpuSendPacketFunction<164>,gpuSendPacketFunction<165>,gpuSendPacketFunction<166>,gpuSendPacketFunction<167>,
+    gpuSendPacketFunction<168>,gpuSendPacketFunction<169>,gpuSendPacketFunction<170>,gpuSendPacketFunction<171>,
+    gpuSendPacketFunction<172>,gpuSendPacketFunction<173>,gpuSendPacketFunction<174>,gpuSendPacketFunction<175>,
+    gpuSendPacketFunction<176>,gpuSendPacketFunction<177>,gpuSendPacketFunction<178>,gpuSendPacketFunction<179>,
+    gpuSendPacketFunction<180>,gpuSendPacketFunction<181>,gpuSendPacketFunction<182>,gpuSendPacketFunction<183>,
+    gpuSendPacketFunction<184>,gpuSendPacketFunction<185>,gpuSendPacketFunction<186>,gpuSendPacketFunction<187>,
+    gpuSendPacketFunction<188>,gpuSendPacketFunction<189>,gpuSendPacketFunction<190>,gpuSendPacketFunction<191>,
+    gpuSendPacketFunction<192>,gpuSendPacketFunction<193>,gpuSendPacketFunction<194>,gpuSendPacketFunction<195>,
+    gpuSendPacketFunction<196>,gpuSendPacketFunction<197>,gpuSendPacketFunction<198>,gpuSendPacketFunction<199>,
+    gpuSendPacketFunction<200>,gpuSendPacketFunction<201>,gpuSendPacketFunction<202>,gpuSendPacketFunction<203>,
+    gpuSendPacketFunction<204>,gpuSendPacketFunction<205>,gpuSendPacketFunction<206>,gpuSendPacketFunction<207>,
+    gpuSendPacketFunction<208>,gpuSendPacketFunction<209>,gpuSendPacketFunction<210>,gpuSendPacketFunction<211>,
+    gpuSendPacketFunction<212>,gpuSendPacketFunction<213>,gpuSendPacketFunction<214>,gpuSendPacketFunction<215>,
+    gpuSendPacketFunction<216>,gpuSendPacketFunction<217>,gpuSendPacketFunction<218>,gpuSendPacketFunction<219>,
+    gpuSendPacketFunction<220>,gpuSendPacketFunction<221>,gpuSendPacketFunction<222>,gpuSendPacketFunction<223>,
+    gpuSendPacketFunction<224>,gpuSendPacketFunction<225>,gpuSendPacketFunction<226>,gpuSendPacketFunction<227>,
+    gpuSendPacketFunction<228>,gpuSendPacketFunction<229>,gpuSendPacketFunction<230>,gpuSendPacketFunction<231>,
+    gpuSendPacketFunction<232>,gpuSendPacketFunction<233>,gpuSendPacketFunction<234>,gpuSendPacketFunction<235>,
+    gpuSendPacketFunction<236>,gpuSendPacketFunction<237>,gpuSendPacketFunction<238>,gpuSendPacketFunction<239>,
+    gpuSendPacketFunction<240>,gpuSendPacketFunction<241>,gpuSendPacketFunction<242>,gpuSendPacketFunction<243>,
+    gpuSendPacketFunction<244>,gpuSendPacketFunction<245>,gpuSendPacketFunction<246>,gpuSendPacketFunction<247>,
+    gpuSendPacketFunction<248>,gpuSendPacketFunction<249>,gpuSendPacketFunction<250>,gpuSendPacketFunction<251>,
+    gpuSendPacketFunction<252>,gpuSendPacketFunction<253>,gpuSendPacketFunction<254>,gpuSendPacketFunction<255>,
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 INLINE void gpuReset(void)
 {
@@ -236,7 +304,8 @@ INLINE void gpuSendPacket()
 #ifdef DEBUG_ANALYSIS
 	dbg_anacnt_GPU_sendPacket++;
 #endif
-	gpuSendPacketFunction(PacketBuffer.U4[0]>>24);
+    int cmd = PacketBuffer.U4[0]>>24;
+    handlers[cmd]();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
