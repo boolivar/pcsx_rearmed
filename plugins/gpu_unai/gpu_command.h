@@ -21,6 +21,26 @@
 #ifndef UNAI_GPU_COMMAND_H
 #define UNAI_GPU_COMMAND_H
 
+///////////////////////////////////////////////////////////////////////////////
+//  Inner loop driver instanciation file
+#include "gpu_inner.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// GPU internal image drawing functions
+#include "gpu_raster_image.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// GPU internal line drawing functions
+#include "gpu_raster_line.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// GPU internal polygon drawing functions
+#include "gpu_raster_polygon.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// GPU internal sprite drawing functions
+#include "gpu_raster_sprite.h"
+
 typedef void (*command_t)();
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,7 +65,6 @@ INLINE void gpuSetTexture(u16 tpage)
 	TEXT_MODE   = (((tpage>>7)&0x3) + 1 ) << 5; // +1 el cero no lo usamos
 
 	TBA = &((u16*)GPU_FrameBuffer)[FRAME_OFFSET(tx, ty)];
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,12 +89,10 @@ INLINE void gpuSetCLUT(u16 clut)
 #define Blending_Mode (((PRIM&0x2)&&(blend))?BLEND_MODE:0)
 #define Lighting (((~PRIM)&0x1)&&(light))
 
-template<int PRIM>
-void gpuSendPacketFunction()
-{
+inline void gpuSendPacket(const int PRIM) {
     //printf("0x%x\n",PRIM);
 
-	switch (PRIM)
+    switch (PRIM)
 	{
 		case 0x02:
 			NULL_GPU();
@@ -464,6 +481,12 @@ void gpuSendPacketFunction()
 			}
 			break;
 	}
+}
+
+template<int PRIM>
+void gpuSendPacketFunction()
+{
+    gpuSendPacket(PRIM);
 }
 
 #endif // UNAI_GPU_COMMAND_H

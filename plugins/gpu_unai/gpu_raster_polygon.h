@@ -18,6 +18,11 @@
 *   51 Franklin Street, Fifth Floor, Boston, MA 02111-1307 USA.           *
 ***************************************************************************/
 
+#ifndef UNAI_GPU_RASTER_POLYGON_H
+#define UNAI_GPU_RASTER_POLYGON_H
+
+#include "gpu.h"
+
 #define GPU_TESTRANGE3() \
 { \
 	if(x0<0) { if((x1-x0)>CHKMAX_X) return; if((x2-x0)>CHKMAX_X) return; } \
@@ -747,3 +752,5 @@ void gpuDrawGT3(const PP gpuPolySpanDriver)
 		}
 	}
 }
+
+#endif // UNAI_GPU_RASTER_POLYGON_H

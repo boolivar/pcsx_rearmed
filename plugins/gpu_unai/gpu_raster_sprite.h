@@ -18,6 +18,11 @@
 *   51 Franklin Street, Fifth Floor, Boston, MA 02111-1307 USA.           *
 ***************************************************************************/
 
+#ifndef UNAI_GPU_RASTER_SPRITE_H
+#define UNAI_GPU_RASTER_SPRITE_H
+
+#include "gpu.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 //  GPU internal sprite drawing functions
 
@@ -172,3 +177,5 @@ void gpuDrawT(const PT gpuTileSpanDriver)
 		}
 	}
 }
+
+#endif // UNAI_GPU_RASTER_SPRITE_H

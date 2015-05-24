@@ -30,6 +30,17 @@
 
 #define VIDEO_WIDTH 320
 
+///////////////////////////////////////////////////////////////////////////////
+//  GPU Raster Macros
+#define	GPU_RGB16(rgb)        ((((rgb)&0xF80000)>>9)|(((rgb)&0xF800)>>6)|(((rgb)&0xF8)>>3))
+
+#define GPU_EXPANDSIGN(x)  (((s32)(x)<<21)>>21)
+
+#define CHKMAX_X 1024
+#define CHKMAX_Y 512
+
+#define	GPU_SWAP(a,b,t)	{(t)=(a);(a)=(b);(b)=(t);}
+
 typedef char				s8;
 typedef signed short		s16;
 typedef signed int			s32;
