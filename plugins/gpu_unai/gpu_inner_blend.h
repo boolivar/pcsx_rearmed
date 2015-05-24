@@ -26,16 +26,16 @@
 #ifdef __arm__
 #define gpuBlending00(uSrc,uDst) \
 { \
-	asm ("and  %[src], %[src], %[msk]\n" \
-	     "and  %[dst], %[dst], %[msk]\n" \
+    asm ("and  %[src], %[src], #0x7bde\n" \
+         "and  %[dst], %[dst], #0x7bde\n" \
 	     "add  %[src], %[dst], %[src]\n" \
 	     "mov  %[src], %[src], lsr #1\n" \
-	 : [src] "=&r" (uSrc), [dst] "=&r" (uDst) : "0" (uSrc), "1" (uDst), [msk] "r" (uMsk)); \
+     : [src] "=&r" (uSrc), [dst] "=&r" (uDst) : "0" (uSrc), "1" (uDst)); \
 }
 #else
 #define gpuBlending00(uSrc,uDst) \
 { \
-	uSrc = (((uDst & uMsk) + (uSrc & uMsk)) >> 1); \
+    uSrc = (((uDst & 0x7bde) + (uSrc & 0x7bde)) >> 1); \
 }
 #endif
 
